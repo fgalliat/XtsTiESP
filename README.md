@@ -11,13 +11,12 @@ Xtase - fgalliat @Aug 2020
   - SdFat
   - TFT_eSPI
 
-  - TFT_eSPI (with custom config see ./libs)
 - **hardware :**
   - ESP32 mini
   - Adafruit ProtoShield (for UNO)
   - ILI9341
   - SDCard reader
-  - Buzzer
+  - Buzzer / LED
   - -- Ti92 / Arduino ProMini 5v (328P) --
 
 - **devboard :**
@@ -26,10 +25,11 @@ Xtase - fgalliat @Aug 2020
     - [ ] test SDCard custom SPI config
     - [ ] test all UARTs (0, 1, x)
     - [ ] protect SerialX from 5v logic (switchable)
+    - [ ] BUZZER / LED
 
   - **Diagram :**
 
-    - DevBoard **!! NOT UNO Compatible !!**
+    - DevBoard **!! NOT UNO Compatible !! (even if same form factor)**
 
     ![DevBoard !! NOT UNO Compatible !!](./pictures/board.png)
 

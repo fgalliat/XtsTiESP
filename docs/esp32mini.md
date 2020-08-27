@@ -1,6 +1,6 @@
 # ESP32 Mini (HW665)
 
-ILI 9486 SPI / SdCard SPI (not shared)
+ILI 9341 SPI / SdCard SPI (not shared)
 
 - SD
 
@@ -13,12 +13,8 @@ ILI 9486 SPI / SdCard SPI (not shared)
 
   ```
   #include "SPI.h"
-  // Call up the TFT library
   #include <TFT_eSPI.h> // Hardware-specific library for ESP8266
-  // Invoke TFT library this will set the TFT chip select high
   TFT_eSPI tft = TFT_eSPI();
-  
-  == w/ a custom (4rpi) Setup file ==
   
   #define OWN_SPI_CS   5
   #define OWN_SPI_DC   15

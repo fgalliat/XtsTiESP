@@ -25,11 +25,11 @@ Xtase - fgalliat @Aug 2020
   - **TODO:**
     - [x] Board wiring diagram
     - [ ] Soldering
-      - [ ] SCL & SDA
-      - [ ] maybe Aref to Vcc (SCL,SDA,Vcc,GND ~kinda GROVE)
+      - [x] SCL & SDA
+      - [x] maybe Aref to Vcc (SCL,SDA,Vcc,GND ~kinda GROVE)
       - [ ] 8pins headers for Screen on lower-board
-      - [ ] SDCard Reader on upper board / cut pins @ bottom
-      - [ ] SDCard to SPI SD (**test it**)
+      - [x] SDCard Reader on upper board / cut pins @ bottom
+      - [ ] SDCard to SPI SD (**test it - code wrote**)
       - [ ] Screen SPI missing solders (MISO,MOSI, SCK)
       - [ ] some solders between lower & upper boards
       - [ ] SPI Screen just next SPI 8pins headers (**test it**)
@@ -37,7 +37,7 @@ Xtase - fgalliat @Aug 2020
     - [ ] test ILI custom SPI config
     - [ ] test all UARTs (0, 1, x)
     - [ ] protect SerialX from 5v logic (switchable)
-    - [ ] BUZZER / LED
+    - [x] BUZZER / LED
 
   - **Diagram :**
 
@@ -45,7 +45,7 @@ Xtase - fgalliat @Aug 2020
 
     ![DevBoard !! NOT UNO Compatible !!](./pictures/board.png)
 
-    - ESP32 mini (HW665)
+    - ESP32 mini (HW665) (Arduino IDE : **WEMOS D1 MINI ESP32**)
 
       ![ESP32 mini wiring](./pictures/esp32_wiring.png)
 

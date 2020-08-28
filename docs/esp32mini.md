@@ -6,6 +6,14 @@ ILI 9341 SPI / SdCard SPI (not shared)
 
   ```c++
   #include <SDFat.h>
+
+  // in SdFatConfig.h (of SdFatLib)
+  //  If the symbol ENABLE_EXTENDED_TRANSFER_CLASS is nonzero, the class SdFatEX
+  //  will be defined. If the symbol ENABLE_SOFTWARE_SPI_CLASS is also nonzero,
+  //  the class SdFatSoftSpiEX will be defined.
+  //  These classes used extended multi-block SD I/O for better performance.
+  //  the SPI bus may not be shared with other devices in this mode.
+
   SdFatSoftSpiEX<2, 4, 14> SD; // MISO, MOSI, SCK  
   ```
 

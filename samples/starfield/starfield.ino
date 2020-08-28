@@ -64,10 +64,10 @@ void setup() {
   //tft.fastSetup(); // Prepare plot window range for fast pixel plotting
 }
 
-// #define MI_W 160
-// #define MI_H 120
-#define MI_W 240
-#define MI_H 160
+#define MI_W 160
+#define MI_H 120
+//#define MI_W 240
+//#define MI_H 160
 
 void loop()
 {

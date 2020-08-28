@@ -24,6 +24,15 @@ Xtase - fgalliat @Aug 2020
 - **devboard :**
   - **TODO:**
     - [x] Board wiring diagram
+    - [ ] Soldering
+      - [ ] SCL & SDA
+      - [ ] maybe Aref to Vcc (SCL,SDA,Vcc,GND ~kinda GROVE)
+      - [ ] 8pins headers for Screen on lower-board
+      - [ ] SDCard Reader on upper board / cut pins @ bottom
+      - [ ] SDCard to SPI SD (**test it**)
+      - [ ] Screen SPI missing solders (MISO,MOSI, SCK)
+      - [ ] some solders between lower & upper boards
+      - [ ] SPI Screen just next SPI 8pins headers (**test it**)
     - [ ] test SDCard custom SPI config
     - [ ] test ILI custom SPI config
     - [ ] test all UARTs (0, 1, x)

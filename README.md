@@ -36,7 +36,7 @@ Xtase - fgalliat @Aug 2020
     - [x] test SDCard custom SPI config
     - [ ] test ILI custom SPI config
     - [ ] test all UARTs (0, 1, x)
-    - [ ] protect SerialX from 5v logic (switchable)
+    - [x] protect SerialX from 5v logic (switchable)
     - [x] BUZZER / LED
 
   - **Diagram :**

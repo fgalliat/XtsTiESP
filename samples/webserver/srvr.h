@@ -5,6 +5,14 @@
   * 
   * WebServer
   * 
+  * GET / HTTP/1.1 (...)
+  * GET /scriptB.jss
+  * 
+  * 
+  * POST /EPDa
+  * POST /aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (...)
+  * POST /SHOW
+  * 
   * inspired by :
   * @author  Waveshare Team
   * @date    23-January-2018
@@ -146,6 +154,8 @@ bool Srvr__loop()
 
         // Save it in the buffer and increment its index
         Buff__bufArr[Buff__bufInd++] = (byte)q;
+
+        Serial.write( (char)q ); // FIXME : temp
 
         // If the carachter means the end of line, then...
         if ((q == 10) || (q == 13)) {

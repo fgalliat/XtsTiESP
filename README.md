@@ -52,4 +52,6 @@ Xtase - fgalliat @Aug 2020
 - **ideas :**
 
   - webServer w/ DnD + UPLOAD
+    - in progress
+    - secure POST request w/ a token (~AUTH form)
   - BT Server / HID Server

@@ -12,7 +12,6 @@
  *  the class SdFatSoftSpiEX will be defined.
  *  These classes used extended multi-block SD I/O for better performance.
  *  the SPI bus may not be shared with other devices in this mode.
-
  * 
  * 
  */

@@ -5,6 +5,7 @@
   * 
   * WebServer
   * 
+  * 12345678901
   * GET / HTTP/1.1 (...)
   * GET /scriptB.jss
   * 
@@ -19,6 +20,17 @@
   *
   ******************************************************************************
   */
+
+/* == AUTH request example ==
+POST /auth HTTP/1.1
+Host: 192.168.4.1
+(...)
+Accept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7                               
+                                                                                   
+login=toto&password=titi
+*/
+
+
 
 /* Includes ------------------------------------------------------------------*/
 #include <WiFi.h>
@@ -43,8 +55,8 @@ IPAddress myIP;        // IP address in your local wifi net
 bool isIndexPage = true; // true : GET  request, client needs 'index' page;
 // false: POST request, server sends empty page.
 /* Server initialization -------------------------------------------------------*/
-void Srvr__setup()
-{
+void Srvr__setup() {
+
     Serial.println();
     Serial.println();
     Serial.print("Connecting to ");
@@ -83,6 +95,31 @@ void Srvr__setup()
     // Start the server
     server.begin();
     Serial.println("Server started on :80");
+}
+
+bool sendIndexPage(WiFiClient client,IPAddress myIP) {
+    Serial.print("> HomePage");
+    #if SD_SUPPORT
+        if ( SD.exists("/www/index.html") ) {
+            // client.print("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n");
+
+            File f = SD.open("/www/index.html");
+            if ( !f ) { client.println("Oups failed to read index page"); return true; }
+            char buffer[1024+1]; memset(buffer, 0x00, 1024+1);
+            while( f.available() ) {
+                int nb = f.read( buffer, 1024 );
+                client.write( buffer, nb );
+            }
+            f.close();
+
+            // this is done after
+            // client.print("\r\n");
+            // delay(1);
+        } else
+    #endif
+    sendHtml(client, myIP);
+
+    return true;
 }
 
 /* Sending a script to the client's browser ------------------------------------*/
@@ -126,6 +163,55 @@ bool Srvr__file(WiFiClient client, int fileIndex, char *fileName)
     return true;
 }
 
+// AUTH request
+const char* authReq = "POST /auth HTTP/1.1";
+const int authReqLen = strlen( authReq );
+
+
+void authenticate(WiFiClient client,IPAddress myIP) {
+    Buff__bufInd = 0;
+    while (client.available()) {
+        // Read a character from 'client'
+        int q = client.read();
+
+        // Save it in the buffer and increment its index
+        Buff__bufArr[Buff__bufInd++] = (byte)q;
+
+        if (Buff__signature(Buff__bufInd - 4, "\r\n\r\n")) { break; }
+    }
+
+    int remaining = client.available();
+    uint8_t authVars[ remaining + 1 ] ;
+    authVars[remaining] = 0x00;
+    client.read(authVars, remaining);
+
+    const char* login="xtase";
+    const char* pass ="esp32";
+    char seq[64]; sprintf(seq, "login=%s&password=%s", login, pass);
+
+    Serial.println("--------------");
+    Serial.println( (char*)seq);
+    Serial.println( (char*)authVars);
+    Serial.println("--------------");
+
+
+    bool authOK = strncmp( (char*)seq, (char*)authVars, strlen( seq ) ) == 0;
+
+    client.print("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n");
+
+    if ( authOK ) {
+        client.println( "auth is OK" );
+    } else {
+        // wrong auth goes to /index
+        sendIndexPage(client, myIP);
+    }
+
+    client.print("\r\n");
+    delay(1);
+}
+
+
+
 /* The server state observation loop -------------------------------------------*/
 bool Srvr__loop()
 {
@@ -164,6 +250,15 @@ bool Srvr__loop()
             continue;
         }
 
+        // auth req ?
+        if (Buff__bufInd == authReqLen) {
+            if ( strncmp( authReq, Buff__bufArr, authReqLen ) == 0 ) {
+                Serial.println("AUTH request !!!");
+                authenticate(client, myIP);
+                return true;
+            }
+        }
+
         // Requests of files
         if (Buff__bufInd >= 11) {
             if (Buff__signature(Buff__bufInd - 11, "/styles.css"))
@@ -180,6 +275,22 @@ bool Srvr__loop()
 
             if (Buff__signature(Buff__bufInd - 11, "/scriptD.js"))
                 return Srvr__file(client, 4, "scriptD.js");
+
+            if (Buff__signature(4, "/upload.html")) {
+                // respond legacy page
+                sendHtml(client, myIP);
+                client.print("\r\n");
+                delay(1);
+                return true;
+            }
+
+            if (Buff__signature(4, "/favicon.ico")) {
+                // respond 404
+                client.print("HTTP/1.1 400 NOK\r\n");
+                client.print("\r\n");
+                delay(1);
+                return true;
+            }
         }
 
         // If the buffer's length is larger, than 4 (length of command's name), then...
@@ -272,10 +383,12 @@ bool Srvr__loop()
     client.print("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n");
 
     // Send the 'index' page if it's needed
-    if (isIndexPage)
-        sendHtml(client, myIP);
-    else
+    if (isIndexPage) {
+        sendIndexPage(client, myIP);
+    }
+    else {
         client.print("Ok!");
+    }
 
     client.print("\r\n");
     delay(1);
@@ -284,3 +397,4 @@ bool Srvr__loop()
     Serial.println(">>>");
     return true;
 }
+

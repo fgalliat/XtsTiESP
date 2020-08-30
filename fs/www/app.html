@@ -14,8 +14,11 @@
                 location.href = '/';
             }
 
+            // =====> POST API <=====
+
             var xhReq=new XMLHttpRequest();
             var rqPrf="http://"+ host +"/";
+
             function _u_send(cmd,syncMode) {
               if ( syncMode == null ) { syncMode = true; }
               console.log('POST '+ rqPrf+cmd );
@@ -24,8 +27,24 @@
             return 0;
             }
 
+            function byteToStr(v){return String.fromCharCode((v & 0xF) + 97, ((v >> 4) & 0xF) + 97);}
+            function wordToStr(v){return byteToStr(v&0xFF) + byteToStr((v>>8)&0xFF);}
+
+            function enodeStr(str) {
+                var result = "";
+                for(var i=0; i < str.length; i++) {
+                    result += byteToStr( str.charCodeAt(i) );
+                }
+                return result;
+            }
+
+            // =====================
+
             function updateFile(token, filename) {
                 var content = document.getElementById('content').value;
+                content = enodeStr( content );
+                console.log( content );
+
                 _u_send('REPL:file:'+filename+':'+content.length);
                 for(var i=0; i < content.length; i+=512) {
                     var max = i+512;

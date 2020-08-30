@@ -339,6 +339,41 @@ bool Srvr__loop()
             // It is probably POST request, no need to send the 'index' page
             isIndexPage = false;
 
+            if (Buff__signature(5, "/REPL:")) {
+                Serial.print("\r\nREPLACE command\r\n");
+
+                Buff__bufInd = 0;
+                while (client.available()) {
+                    int q = client.read();
+                    Buff__bufArr[Buff__bufInd++] = (byte)q;
+                    if (Buff__signature(Buff__bufInd - 2, "\r\n")) { break; }
+                }
+
+                if (Buff__signature(0, "file:")) {
+                    Serial.println( "Sends the filename" );
+                } else if (Buff__signature(0, "EOF")) {
+                    Serial.println( "Sends the EOF" );
+                } else {
+                    for(int i=0; i < Buff__bufInd-2; i+=2) {
+                        int ch = Buff__getByte(i);
+                        if ( ch == -1 ) {
+                            // can occurs @ end of string ...?
+                            // Serial.println("Error decoding blob");
+                            break;
+                        }
+                        Serial.write( (char)ch );
+                    }
+                    Serial.println( "=============" );
+                }
+
+                client.print("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n");
+                client.print("OK\n");
+                client.print("\r\n");
+                delay(1);
+                return true;
+            }
+
+
             // e-Paper driver initialization
             if (Buff__signature(Buff__bufInd - 4, "EPD")) {
                 Serial.print("\r\nEPD\r\n");

@@ -227,10 +227,11 @@ void authenticate(WiFiClient client,IPAddress myIP) {
 
         const char* resp = "<script>\n "\
         " sessionStorage.setItem('token', '%s'); \n" \
+        " sessionStorage.setItem('host', '%s.%s.%s.%s'); \n" \
         " location.href='/app.html'; \n "\
         "</script>";
 
-        client.printf( resp, token );
+        client.printf( resp, token, String(myIP[0],DEC), String(myIP[1],DEC), String(myIP[2],DEC), String(myIP[3],DEC) );
 
     } else {
         // wrong auth goes to /index

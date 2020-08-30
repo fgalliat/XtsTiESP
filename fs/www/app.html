@@ -7,24 +7,49 @@
         </style>
         <script>
             var token = sessionStorage.getItem('token');
+            var host  = sessionStorage.getItem('host');
 
             function logout() {
                 sessionStorage.setItem('token', null);
                 location.href = '/';
             }
 
-            function edit() {
-                var filename = 'app.html';
+            var xhReq=new XMLHttpRequest();
+            var rqPrf="http://"+ host +"/";
+            function _u_send(cmd,syncMode) {
+              if ( syncMode == null ) { syncMode = true; }
+              console.log('POST '+ rqPrf+cmd );
+              xhReq.open('POST',rqPrf+cmd, !syncMode);
+              xhReq.send('');
+            return 0;
+            }
 
-                var txt = "<form name=\"replace\" method=\"POST\" action=\"/replace\" >"+
-                    "  <input type=\"hidden\" name=\"token\" value=\""+ token +"\" />"+
-                    "  <input type=\"hidden\" name=\"filename\" value=\""+ filename +"\" />"+
-                    "  <textarea name=\"content\" style=\"width:100%;height:100%\" rows=\"20\">Place you file here\nbeware it will replace '"+ filename +"'</textarea><br/>"+
-                    "  <input type=\"submit\" value=\"REPLACE\">"
-                "</form>";
+            function updateFile(token, filename) {
+                var content = document.getElementById('content').value;
+                _u_send('REPL:file:'+filename+':'+content.length);
+                for(var i=0; i < content.length; i+=512) {
+                    var max = i+512;
+                    if ( max > content.length ) { max = content.length; }
+                    var subs = content.substring( i, max );
+                    _u_send('REPL:'+ subs);
+                }
+                _u_send('REPL:EOF');
+            }
+
+            function edit() {
+                var filename = 'test.html';
+
+                var txt = ""+
+                    "  <textarea name=\"content\" id=\"content\" style=\"width:100%;height:70%\">Place you file here\nbeware it will replace '"+ filename +"'</textarea><br/>"+
+                    "  <button onclick=\"updateFile('"+ token +"', '"+ filename +"')\">REPLACE</button>"
+                "";
 
                 document.getElementById('main').innerHTML = txt;
             }
+
+
+
+
 
         </script>
     </head>

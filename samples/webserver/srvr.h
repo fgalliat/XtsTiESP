@@ -122,6 +122,25 @@ bool sendIndexPage(WiFiClient client,IPAddress myIP) {
     return true;
 }
 
+bool sendAppPage(WiFiClient client,IPAddress myIP) {
+    Serial.print("> AppPage");
+    #if SD_SUPPORT
+        if ( SD.exists("/www/app.html") ) {
+            File f = SD.open("/www/app.html");
+            if ( !f ) { client.println("Oups failed to read app page"); return true; }
+            char buffer[1024+1]; memset(buffer, 0x00, 1024+1);
+            while( f.available() ) {
+                int nb = f.read( buffer, 1024 );
+                client.write( buffer, nb );
+            }
+            f.close();
+        } else
+    #endif
+    sendHtml(client, myIP);
+
+    return true;
+}
+
 /* Sending a script to the client's browser ------------------------------------*/
 bool Srvr__file(WiFiClient client, int fileIndex, char *fileName)
 {
@@ -201,6 +220,18 @@ void authenticate(WiFiClient client,IPAddress myIP) {
 
     if ( authOK ) {
         client.println( "auth is OK" );
+
+        // generate a token
+        char token[16+1]; memset(token, 16+1, 0x00);
+        ltoa(millis(),  token, 10 ); // 10 for Base10
+
+        const char* resp = "<script>\n "\
+        " sessionStorage.setItem('token', '%s'); \n" \
+        " location.href='/app.html'; \n "\
+        "</script>";
+
+        client.printf( resp, token );
+
     } else {
         // wrong auth goes to /index
         sendIndexPage(client, myIP);
@@ -277,8 +308,17 @@ bool Srvr__loop()
                 return Srvr__file(client, 4, "scriptD.js");
 
             if (Buff__signature(4, "/upload.html")) {
+                client.print("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n");
                 // respond legacy page
                 sendHtml(client, myIP);
+                client.print("\r\n");
+                delay(1);
+                return true;
+            }
+
+            if (Buff__signature(4, "/app.html")) {
+                client.print("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n");
+                sendAppPage(client, myIP);
                 client.print("\r\n");
                 delay(1);
                 return true;

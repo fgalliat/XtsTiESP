@@ -1,0 +1,52 @@
+<html>
+    <head>
+        <title>Xtase APP page</title>
+        <style>
+            body { background-color: black; color: #F0F0F0; font-family: Arial, Helvetica, sans-serif; }
+            a { color: grey; }
+        </style>
+        <script>
+            var token = sessionStorage.getItem('token');
+
+            function logout() {
+                sessionStorage.setItem('token', null);
+                location.href = '/';
+            }
+
+            function edit() {
+                var filename = 'app.html';
+
+                var txt = "<form name=\"replace\" method=\"POST\" action=\"/replace\" >"+
+                    "  <input type=\"hidden\" name=\"token\" value=\""+ token +"\" />"+
+                    "  <input type=\"hidden\" name=\"filename\" value=\""+ filename +"\" />"+
+                    "  <textarea name=\"content\" style=\"width:100%;height:100%\" rows=\"20\">Place you file here\nbeware it will replace '"+ filename +"'</textarea><br/>"+
+                    "  <input type=\"submit\" value=\"REPLACE\">"
+                "</form>";
+
+                document.getElementById('main').innerHTML = txt;
+            }
+
+        </script>
+    </head>
+    <body>
+        <table border="0" width="100%" height="100%">
+            <tr align="top" height="25px">
+                <td align="right">
+                    <a href="javascript:logout()">(logout)</a>
+                </td>
+            </tr>
+            <tr align="top" height="25px">
+                <td align="right">
+                    <a href="javascript:edit()">(edit)</a>
+                </td>
+            </tr>
+            <tr align="middle">
+                <td align="center" id="main">
+                    <script>
+                        document.write("Hello Stranger ! ("+ sessionStorage.getItem('token') +")");
+                    </script>
+                </td>
+            </tr>
+        </table>
+    </body>
+</html>

@@ -250,7 +250,8 @@ void authenticate(WiFiClient client,IPAddress myIP) {
     delay(1);
 }
 
-
+int uploadFileLen = -1;
+int uploadFileGot = -1;
 
 /* The server state observation loop -------------------------------------------*/
 bool Srvr__loop()
@@ -370,10 +371,44 @@ bool Srvr__loop()
                     }
 
                     if (Buff__signature(0, "file:")) {
-                        Serial.println( "Sends the filename" );
+                        char filename[64]; memset(filename, 0x00, 64);
+                        sprintf(filename, "/www/");
+                        int addr = 5; // "/www/".length()
+                        int i = 5; // "file:".length();
+                        for(; i < Buff__bufInd-2; i++) {
+                            if ( Buff__bufArr[i] == ':' ) {
+                                break;
+                            }
+                            // FIXME : ensure that name is not more than 63 bytes loong
+                            filename[addr++] = Buff__bufArr[i];
+                        }
+                        filename[addr] = 0x00;
+                        i++;
+                        char fileLenStr[16]; 
+                        addr = 0;
+                        for(; i < Buff__bufInd-2; i++) {
+                            fileLenStr[addr++] = Buff__bufArr[i];
+                        }
+                        fileLenStr[addr] = 0x00;
+                        int fileLen = atoi( fileLenStr );
+
+                        Serial.print( "Sends the filename (" );
+                        Serial.print( filename );
+                        Serial.print( ")-(" );
+                        Serial.print( fileLen );
+                        Serial.println( ")" );
+
+                        uploadFileLen = fileLen;
+                        uploadFileGot = 0;
+
                     } else if (Buff__signature(0, "EOF")) {
-                        Serial.println( "Sends the EOF" );
+                        Serial.print( "Sends the EOF > " );
+                        Serial.print( uploadFileGot );
+                        Serial.print( " Vs " );
+                        Serial.println( uploadFileLen );
+
                     } else {
+                        uploadFileGot += Buff__bufInd-2;
                         for(int i=0; i < Buff__bufInd-2; i+=2) {
                             int ch = Buff__getByte(i);
                             if ( ch == -1 ) {

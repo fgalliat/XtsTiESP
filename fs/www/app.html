@@ -19,10 +19,11 @@
             var xhReq=new XMLHttpRequest();
             var rqPrf="http://"+ host +"/";
 
-            function _u_send(cmd,syncMode) {
+            function _u_send(cmd, data,syncMode) {
               if ( syncMode == null ) { syncMode = true; }
-              console.log('POST '+ rqPrf+cmd );
-              xhReq.open('POST',rqPrf+cmd, !syncMode);
+              var comm = rqPrf+cmd+':'+token+':'+data;
+              console.log('POST '+ comm );
+              xhReq.open('POST',comm, !syncMode);
               xhReq.send('');
             return 0;
             }
@@ -45,14 +46,14 @@
                 content = enodeStr( content );
                 console.log( content );
 
-                _u_send('REPL:file:'+filename+':'+content.length);
+                _u_send('REPL','file:'+filename+':'+content.length);
                 for(var i=0; i < content.length; i+=512) {
                     var max = i+512;
                     if ( max > content.length ) { max = content.length; }
                     var subs = content.substring( i, max );
-                    _u_send('REPL:'+ subs);
+                    _u_send('REPL', subs);
                 }
-                _u_send('REPL:EOF');
+                _u_send('REPL','EOF');
             }
 
             function edit() {

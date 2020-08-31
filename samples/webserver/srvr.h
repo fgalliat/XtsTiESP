@@ -45,6 +45,9 @@ login=toto&password=titi
 const char *ssid     = "Xtase-ESP";
 const char *password = "xtaseESP";   // in AP mode : password MUST be >= 8 bytes
 
+#define WEB_LOGIN "xtase"
+#define WEB_PASS  "esp32"
+
 #define WIFI_STA_MODE 0
 
 /* Server and IP address ------------------------------------------------------*/
@@ -186,6 +189,10 @@ bool Srvr__file(WiFiClient client, int fileIndex, char *fileName)
 const char* authReq = "POST /auth HTTP/1.1";
 const int authReqLen = strlen( authReq );
 
+#define TOKEN_MAX_LEN 16
+char token[TOKEN_MAX_LEN+1];
+int tokenLen = 0;
+
 
 void authenticate(WiFiClient client,IPAddress myIP) {
     Buff__bufInd = 0;
@@ -204,12 +211,12 @@ void authenticate(WiFiClient client,IPAddress myIP) {
     authVars[remaining] = 0x00;
     client.read(authVars, remaining);
 
-    const char* login="xtase";
-    const char* pass ="esp32";
+    const char* login= WEB_LOGIN;
+    const char* pass = WEB_PASS;
     char seq[64]; sprintf(seq, "login=%s&password=%s", login, pass);
 
     Serial.println("--------------");
-    Serial.println( (char*)seq);
+    // Serial.println( (char*)seq);
     Serial.println( (char*)authVars);
     Serial.println("--------------");
 
@@ -222,8 +229,9 @@ void authenticate(WiFiClient client,IPAddress myIP) {
         client.println( "auth is OK" );
 
         // generate a token
-        char token[16+1]; memset(token, 16+1, 0x00);
+        memset(token, TOKEN_MAX_LEN+1, 0x00);
         ltoa(millis(),  token, 10 ); // 10 for Base10
+        tokenLen = strlen(token);
 
         const char* resp = "<script>\n "\
         " sessionStorage.setItem('token', '%s'); \n" \
@@ -342,32 +350,51 @@ bool Srvr__loop()
             if (Buff__signature(5, "/REPL:")) {
                 Serial.print("\r\nREPLACE command\r\n");
 
+                // read the token
                 Buff__bufInd = 0;
                 while (client.available()) {
                     int q = client.read();
                     Buff__bufArr[Buff__bufInd++] = (byte)q;
-                    if (Buff__signature(Buff__bufInd - 2, "\r\n")) { break; }
+                    if (Buff__signature(Buff__bufInd - 1, ":")) { break; }
                 }
+                bool goodToken = Buff__signature(0, token); 
+                goodToken &= Buff__signature(tokenLen, ":"); // endOfToken
 
-                if (Buff__signature(0, "file:")) {
-                    Serial.println( "Sends the filename" );
-                } else if (Buff__signature(0, "EOF")) {
-                    Serial.println( "Sends the EOF" );
-                } else {
-                    for(int i=0; i < Buff__bufInd-2; i+=2) {
-                        int ch = Buff__getByte(i);
-                        if ( ch == -1 ) {
-                            // can occurs @ end of string ...?
-                            // Serial.println("Error decoding blob");
-                            break;
-                        }
-                        Serial.write( (char)ch );
+                if ( goodToken ) {
+                    // read the data
+                    Buff__bufInd = 0;
+                    while (client.available()) {
+                        int q = client.read();
+                        Buff__bufArr[Buff__bufInd++] = (byte)q;
+                        if (Buff__signature(Buff__bufInd - 2, "\r\n")) { break; }
                     }
-                    Serial.println( "=============" );
-                }
 
-                client.print("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n");
-                client.print("OK\n");
+                    if (Buff__signature(0, "file:")) {
+                        Serial.println( "Sends the filename" );
+                    } else if (Buff__signature(0, "EOF")) {
+                        Serial.println( "Sends the EOF" );
+                    } else {
+                        for(int i=0; i < Buff__bufInd-2; i+=2) {
+                            int ch = Buff__getByte(i);
+                            if ( ch == -1 ) {
+                                // can occurs @ end of string ...?
+                                // Serial.println("Error decoding blob");
+                                break;
+                            }
+                            Serial.write( (char)ch );
+                        }
+                        Serial.println( "=============" );
+                    }
+
+                    client.print("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n");
+                    client.print("OK\n");
+                } else {
+                    Serial.println("Wrong token !");
+
+                    client.print("HTTP/1.1 400 ERROR\r\nContent-Type: text/html\r\n\r\n");
+                    client.print("Wrong token\n");
+                }
+                
                 client.print("\r\n");
                 delay(1);
                 return true;

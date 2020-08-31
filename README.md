@@ -52,6 +52,6 @@ Xtase - fgalliat @Aug 2020
 - **ideas :**
 
   - webServer w/ DnD + UPLOAD
-    - in progress
-    - secure POST request w/ a token (~AUTH form)
+    - secure POST request w/ a token (~AUTH form) (wip)
+    - emit onERROR u_send() message & lock process (todo)
   - BT Server / HID Server

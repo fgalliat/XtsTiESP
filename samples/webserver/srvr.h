@@ -360,6 +360,7 @@ bool Srvr__loop()
                 }
                 bool goodToken = Buff__signature(0, token); 
                 goodToken &= Buff__signature(tokenLen, ":"); // endOfToken
+                int headLen = Buff__bufInd;
 
                 if ( goodToken ) {
                     // read the data
@@ -408,7 +409,6 @@ bool Srvr__loop()
                         Serial.println( uploadFileLen );
 
                     } else {
-                        uploadFileGot += Buff__bufInd-2;
                         for(int i=0; i < Buff__bufInd-2; i+=2) {
                             int ch = Buff__getByte(i);
                             if ( ch == -1 ) {
@@ -417,7 +417,9 @@ bool Srvr__loop()
                                 break;
                             }
                             Serial.write( (char)ch );
+                            uploadFileGot++;
                         }
+                        // uploadFileGot = Buff__bufInd -2;
                         Serial.println( "=============" );
                     }
 

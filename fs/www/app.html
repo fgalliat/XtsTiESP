@@ -43,10 +43,12 @@
 
             function updateFile(token, filename) {
                 var content = document.getElementById('content').value;
-                content = enodeStr( content );
+                var len = content.length; // before encode
+
+                content = enodeStr( content ); // do encode
                 console.log( content );
 
-                _u_send('REPL','file:'+filename+':'+content.length);
+                _u_send('REPL','file:'+filename+':'+len);
                 for(var i=0; i < content.length; i+=512) {
                     var max = i+512;
                     if ( max > content.length ) { max = content.length; }

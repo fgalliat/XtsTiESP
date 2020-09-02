@@ -53,15 +53,6 @@ login=toto&password=titi
 // #define FILE_WRITE (O_RDWR | O_CREAT | O_AT_END)
 #endif
 
-#include "my_wifi.h" // WiFi routines
-
-
-#include "buff.h" // POST request data accumulator
-
-#include "scripts.h" // JavaScript code
-#include "css.h"     // Cascading Style Sheets
-#include "html.h"    // HTML page of the tool
-
 /* SSID and password of your WiFi net ----------------------------------------*/
 const char *ssid     = "Xtase-ESP";
 const char *password = "xtaseESP";   // in AP mode : password MUST be >= 8 bytes
@@ -70,10 +61,21 @@ const char *password = "xtaseESP";   // in AP mode : password MUST be >= 8 bytes
 #define WEB_PASS  "esp32"
 
 #define WIFI_STA_MODE 0
+IPAddress myIP;        // IP address in your local wifi net
+
+#include "my_wifi.h" // WiFi routines
+
+// ==========================
+
+#include "buff.h" // POST request data accumulator
+
+#include "scripts.h" // JavaScript code
+#include "css.h"     // Cascading Style Sheets
+#include "html.h"    // HTML page of the tool
+
 
 /* Server and IP address ------------------------------------------------------*/
 WiFiServer server(80); // Wifi server exemplar using port 80
-IPAddress myIP;        // IP address in your local wifi net
 
 /* The 'index' page flag ------------------------------------------------------*/
 bool isIndexPage = true; // true : GET  request, client needs 'index' page;

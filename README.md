@@ -29,7 +29,7 @@ Xtase - fgalliat @Aug 2020
       - [x] maybe Aref to Vcc (SCL,SDA,Vcc,GND ~kinda GROVE)
       - [ ] 8pins headers for Screen on lower-board
       - [x] SDCard Reader on upper board / cut pins @ bottom
-      - [x] SDCard to SPI SD (**test it - code wrote**)
+      - [x] SDCard to SPI SD (**code wrote / works!**)
       - [ ] Screen SPI missing solders (MISO,MOSI, SCK)
       - [ ] some solders between lower & upper boards
       - [ ] SPI Screen just next SPI 8pins headers (**test it**)
@@ -52,6 +52,8 @@ Xtase - fgalliat @Aug 2020
 - **ideas :**
 
   - webServer w/ DnD + UPLOAD
-    - secure POST request w/ a token (~AUTH form) (wip)
-    - emit onERROR u_send() message & lock process (todo)
+    - secure POST request w/ a token (~AUTH form) (done)
+    - emit onERROR u_send() message & lock process (done)
+    - add SoftAP / STA mode switcher (w/ SoftAP fallback)
+    - add SoftAP / STA  - SSID:psk file support + API (? /etc/wifi.psk ?)
   - BT Server / HID Server

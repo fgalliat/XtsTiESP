@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+ 
+<head>
+    <title>Upload page</title>
+    <meta charset="UTF-8">
+ 
+    <!-- <script src="filereader-drop-example.js"></script> -->
+    <script>
+        function dropHandler(evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+        
+            // FileList object.
+            var files = evt.dataTransfer.files;
+        
+            if (files.length != 1) {
+                resetLog();
+                appendLog("Please drag and drop 1 file!");
+                return;
+            }
+            var file = files[0];
+            processFile(file);
+        }
+
+        function changeHandler(evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+        
+            // FileList object.
+            var files = evt.target.files;
+        
+            var file = files[0];
+            processFile(file);
+        }
+
+        // ========= - ========= - ========= - ========= - 
+        function byteToStr(v){return String.fromCharCode((v & 0xF) + 97, ((v >> 4) & 0xF) + 97);}
+        function wordToStr(v){return byteToStr(v&0xFF) + byteToStr((v>>8)&0xFF);}
+
+        function encodeArrayBuffer(arrayData) {
+            var result = "";
+            // signed 8bits
+            var bytes = new Int8Array( arrayData );
+            var fLen = arrayData.byteLength;
+            for(var i = 0; i < fLen; i++) {
+                var b = bytes[i];
+                if ( b < 0 ) {
+                    b += 256; // as byte in Java
+                }
+
+                result += byteToStr( b );
+            }
+            return result;
+        }
+        // ========= - ========= - ========= - ========= - 
+
+        function processFile(file) {
+            var fileReader = new FileReader();
+        
+            fileReader.onloadstart = function(progressEvent) {
+                resetLog();
+                appendLog("onloadstart!");
+                var msg = "File Name: " + file.name + "<br>" +
+                    "File Size: " + file.size + "<br>" +
+                    "File Type: " + file.type;
+        
+                appendLog(msg);
+            }
+        
+            fileReader.onload = function(progressEvent) {
+                appendLog("onload!");
+        
+                // var stringData = fileReader.result; // Cf readAsText()
+                // appendLog(" ---------------- File Content ----------------: ");
+                // appendLog(stringData);
+
+                console.log("-after parse-");
+
+                var arrayData = fileReader.result; // Cf readAsArrayBuffer()
+                
+                var toSend = encodeArrayBuffer( arrayData );
+
+                var toShow = ""+toSend;
+                if ( toShow.length > 255 ) { toShow = toShow.substring(0, 255)+"(...)"; }
+                appendLog(" ---------------- To Send ----------------: ");
+                appendLog(toShow);
+
+                console.log("-after parse-");
+            }
+        
+            fileReader.onloadend = function(progressEvent) {
+                appendLog("onloadend!");
+                // FileReader.EMPTY, FileReader.LOADING, FileReader.DONE
+                appendLog("readyState = " + fileReader.readyState);
+            }
+        
+            fileReader.onerror = function(progressEvent) {
+                appendLog("onerror!");
+                appendLog("Has Error!");
+            }
+        
+            // Read file asynchronously.
+            console.log("-before read-");
+            // fileReader.readAsText(file, "UTF-8"); // fileReader.result -> String.
+            fileReader.readAsArrayBuffer(file);
+            console.log("-after read-");
+        }
+        
+        function dragoverHandler(evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+            // Explicitly show this is a copy.
+            evt.dataTransfer.dropEffect = 'copy';
+        }
+        
+        function resetLog() {
+            document.getElementById('log-div').innerHTML = "";
+        }
+        
+        function appendLog(msg) {
+            document.getElementById('log-div').innerHTML += "<br>" + msg;
+        }
+    </script>
+ 
+    <style>
+        #drop-area {
+            border: 1px solid blue;
+            padding: 15px;
+            margin-top:5px;
+        }
+    </style>
+ 
+</head>
+ 
+<body>
+ 
+    <h3>FileReader example</h3>
+    <a href="">Reset</a>
+ 
+    <input type="file" onchange = "changeHandler(event)">
+    <br><br>
+
+    <div id="drop-area" ondragover="dragoverHandler(event)" ondrop="dropHandler(event)">
+        Drop one file here
+    </div>
+ 
+    <output id="log-div"></output>
+ 
+</body>
+ 
+</html>

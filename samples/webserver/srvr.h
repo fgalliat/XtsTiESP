@@ -53,6 +53,9 @@ login=toto&password=titi
 // #define FILE_WRITE (O_RDWR | O_CREAT | O_AT_END)
 #endif
 
+#include "my_wifi.h" // WiFi routines
+
+
 #include "buff.h" // POST request data accumulator
 
 #include "scripts.h" // JavaScript code
@@ -317,6 +320,15 @@ int uploadFileGot = -1;
 /* The server state observation loop -------------------------------------------*/
 bool Srvr__loop()
 {
+
+    if ( Serial.available() ) {
+        int c = Serial.read();
+        if ( c == 's' ) {
+            scanNetworks();
+        }
+    }
+
+
     // Looking for a client trying to connect to the server
     WiFiClient client = server.available();
 
@@ -402,6 +414,13 @@ bool Srvr__loop()
 
             if (Buff__signature(4, "/upload.html")) {
                 sendResource(client, myIP, "/www/upload.html", "text/html");
+                return true;
+            }
+
+            if (Buff__signature(4, "/scannet")) {
+                client.print("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n");
+                scanNetworks(&client);
+                client.print("\r\n");
                 return true;
             }
 

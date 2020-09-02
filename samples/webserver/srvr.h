@@ -378,14 +378,14 @@ bool Srvr__loop()
             if (Buff__signature(Buff__bufInd - 11, "/scriptD.js"))
                 return Srvr__file(client, 4, "scriptD.js");
 
-            if (Buff__signature(4, "/upload.html")) {
-                client.print("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n");
-                // respond legacy page
-                sendHtml(client, myIP);
-                client.print("\r\n");
-                delay(1);
-                return true;
-            }
+            // if (Buff__signature(4, "/upload.html")) {
+            //     client.print("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n");
+            //     // respond legacy page
+            //     sendHtml(client, myIP);
+            //     client.print("\r\n");
+            //     delay(1);
+            //     return true;
+            // }
 
             if (Buff__signature(4, "/app.html")) {
                 client.print("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n");
@@ -397,6 +397,11 @@ bool Srvr__loop()
 
             if (Buff__signature(4, "/test.html")) {
                 sendResource(client, myIP, "/www/test.html", "text/html");
+                return true;
+            }
+
+            if (Buff__signature(4, "/upload.html")) {
+                sendResource(client, myIP, "/www/upload.html", "text/html");
                 return true;
             }
 

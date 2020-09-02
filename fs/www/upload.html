@@ -7,6 +7,102 @@
  
     <!-- <script src="filereader-drop-example.js"></script> -->
     <script>
+        // ========= - ========= - ========= - ========= - 
+        var token = sessionStorage.getItem('token');
+        var host  = sessionStorage.getItem('host');
+
+        if ( token == null ) {
+            alert("Oups : no TOKEN !");
+        }
+
+        var xhReq=new XMLHttpRequest();
+        var rqPrf="http://"+ host +"/";
+
+        function _u_send(cmd, data,syncMode) {
+            if ( syncMode == null ) { syncMode = true; }
+            var comm = rqPrf+cmd+':'+token+':'+data;
+            // console.log('POST '+ comm );
+            xhReq.open('POST',comm, !syncMode);
+            xhReq.send('');
+            if ( syncMode ) {
+                if ( xhReq.status != 200 ) {
+                    return false;
+                }
+            }
+        return true;
+        }
+
+        function byteToStr(v){return String.fromCharCode((v & 0xF) + 97, ((v >> 4) & 0xF) + 97);}
+        function wordToStr(v){return byteToStr(v&0xFF) + byteToStr((v>>8)&0xFF);}
+
+        function encodeArrayBuffer(arrayData) {
+            var result = "";
+            // signed 8bits
+            var bytes = new Int8Array( arrayData );
+            var fLen = arrayData.byteLength;
+            for(var i = 0; i < fLen; i++) {
+                var b = bytes[i];
+                if ( b < 0 ) {
+                    b += 256; // as byte in Java
+                }
+
+                result += byteToStr( b );
+            }
+            return result;
+        }
+
+        function encodeStr(str) {
+            var result = "";
+            for(var i=0; i < str.length; i++) {
+                result += byteToStr( str.charCodeAt(i) );
+            }
+            return result;
+        }
+
+        // ========= - ========= - ========= - 
+        /**
+         token    : the auth token
+         filename : ex. "draft.html"
+         len      : the number of data bytes
+         content  : the encoded data bytes
+        */
+        function uploadFile(token, filename, len, content) {
+            var doSend = function(token, filename, len, content) {
+                appendLog("File upload starts");
+                uploadJauge(0);
+
+                var ok = false;
+
+                ok = _u_send('REPL','file:'+filename+':'+len);
+                if ( !ok ) { appendLog("Error @ start"); return; }
+                var percent = 0;
+                var lastPercent = 0;
+                var encLen = content.length;
+                for(var i=0; i < encLen; i+=512) {
+                    var max = i+512;
+                    if ( max > encLen ) { max = encLen; }
+                    var subs = content.substring( i, max );
+                    ok = _u_send('REPL', subs);
+                    if ( !ok ) { appendLog("Error @ "+percent+"%"); return; }
+
+                    percent = Math.ceil( (i / encLen) * 100 );
+                    if ( percent >= lastPercent + 10 ) {
+                        lastPercent = percent;
+                        uploadJauge(percent);
+                    }
+                }
+                ok = _u_send('REPL','EOF');
+                if ( !ok ) { appendLog("Error @ end"); return; }
+                uploadJauge(100);
+
+                appendLog("File uploaded");
+
+            }
+            setTimeout( doSend(token, filename, len, content), 0 ); // just to create a Thread
+        }
+
+        // ========= - ========= - ========= - ========= - 
+
         function dropHandler(evt) {
             evt.stopPropagation();
             evt.preventDefault();
@@ -35,28 +131,36 @@
         }
 
         // ========= - ========= - ========= - ========= - 
-        function byteToStr(v){return String.fromCharCode((v & 0xF) + 97, ((v >> 4) & 0xF) + 97);}
-        function wordToStr(v){return byteToStr(v&0xFF) + byteToStr((v>>8)&0xFF);}
+        function uploadJauge(percent) {
+            try {
+                // document.getElementById('uploadJauge').value = ''+percent+'%';
+                document.getElementById('uploadJauge').style.width = percent+"%";
+            } catch(e) {}
+            console.log(''+percent+'%');
+        }
 
-        function encodeArrayBuffer(arrayData) {
-            var result = "";
-            // signed 8bits
-            var bytes = new Int8Array( arrayData );
-            var fLen = arrayData.byteLength;
-            for(var i = 0; i < fLen; i++) {
-                var b = bytes[i];
-                if ( b < 0 ) {
-                    b += 256; // as byte in Java
-                }
-
-                result += byteToStr( b );
-            }
-            return result;
+        function resetLog() {
+            try { document.getElementById('log-div').innerHTML = ""; } catch(e){}
+            console.clear();
+        }
+        
+        function appendLog(msg) {
+            try { document.getElementById('log-div').innerHTML += "<br>" + msg; } catch(e){}
+            console.log(msg);
         }
         // ========= - ========= - ========= - ========= - 
 
+        var fileToUploadName = null;
+        var fileToUploadSize = -1;
+        var fileToUploadContent = null;
+        
         function processFile(file) {
             var fileReader = new FileReader();
+
+            fileToUploadName = null;
+            fileToUploadSize = -1;
+            fileToUploadContent = null;
+            uploadJauge(0);
         
             fileReader.onloadstart = function(progressEvent) {
                 resetLog();
@@ -66,6 +170,11 @@
                     "File Type: " + file.type;
         
                 appendLog(msg);
+
+                fileToUploadName = file.name;
+                fileToUploadSize = file.size;
+
+                document.getElementById('filename').value = fileToUploadName;
             }
         
             fileReader.onload = function(progressEvent) {
@@ -78,13 +187,14 @@
                 console.log("-after parse-");
 
                 var arrayData = fileReader.result; // Cf readAsArrayBuffer()
-                
                 var toSend = encodeArrayBuffer( arrayData );
 
                 var toShow = ""+toSend;
-                if ( toShow.length > 255 ) { toShow = toShow.substring(0, 255)+"(...)"; }
+                if ( toShow.length > 128 ) { toShow = toShow.substring(0, 128)+"(...)"; }
                 appendLog(" ---------------- To Send ----------------: ");
                 appendLog(toShow);
+
+                fileToUploadContent = toSend;
 
                 console.log("-after parse-");
             }
@@ -107,19 +217,23 @@
             console.log("-after read-");
         }
         
+        function doUploadFile() {
+            if ( fileToUploadSize < 0 || fileToUploadName == null || fileToUploadContent == null ) {
+                alert("File is not ready !");
+                return;
+            }
+            if ( confirm("Sure to upload '"+ fileToUploadName +"' of "+ fileToUploadSize +" bytes ?") ) {
+                uploadFile( token, fileToUploadName, fileToUploadSize, fileToUploadContent );
+            }
+        }
+
+        
+
         function dragoverHandler(evt) {
             evt.stopPropagation();
             evt.preventDefault();
             // Explicitly show this is a copy.
             evt.dataTransfer.dropEffect = 'copy';
-        }
-        
-        function resetLog() {
-            document.getElementById('log-div').innerHTML = "";
-        }
-        
-        function appendLog(msg) {
-            document.getElementById('log-div').innerHTML += "<br>" + msg;
         }
     </script>
  
@@ -135,7 +249,7 @@
  
 <body>
  
-    <h3>FileReader example</h3>
+    <h3>File Upload Page</h3>
     <a href="">Reset</a>
  
     <input type="file" onchange = "changeHandler(event)">
@@ -144,6 +258,15 @@
     <div id="drop-area" ondragover="dragoverHandler(event)" ondrop="dropHandler(event)">
         Drop one file here
     </div>
+
+    <input type="text" id="filename" value="---">
+    <!-- <input type="text" id="uploadJauge" value="---%"> -->
+    
+    <div id="uploadJaugeContainer" style="height:50px; width:200px; background-color: gray;">
+        <div id="uploadJauge" style="height:100%; width:10%; background-color: blue;">%</div>
+    </div>
+
+    <button id="sendFile" onclick="doUploadFile()">Send the file</button>
  
     <output id="log-div"></output>
  

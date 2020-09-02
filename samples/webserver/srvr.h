@@ -35,6 +35,24 @@ login=toto&password=titi
 /* Includes ------------------------------------------------------------------*/
 #include <WiFi.h>
 
+#if SD_SUPPORT
+// ** Warning !! **
+// Due to a WiFi lib collision : some File's flags are redefined then,
+// SdFat can no more CREATE a non-exisiting file !!!!
+// redefining these symbols does the Job
+// from /home/fgalliat/Arduino/libraries/SdFat-master/src/FatLib/FatApiConstants.h
+#define O_RDONLY  0X00  ///< Open for reading only.
+#define O_WRONLY  0X01  ///< Open for writing only.
+#define O_RDWR    0X02  ///< Open for reading and writing.
+#define O_AT_END  0X04  ///< Open at EOF.
+#define O_APPEND  0X08  ///< Set append mode.
+#define O_CREAT   0x10  ///< Create file if it does not exist.
+#define O_TRUNC   0x20  ///< Truncate file to zero length.
+#define O_EXCL    0x40  ///< Fail if the file exists.
+#define O_SYNC    0x80  ///< Synchronized write I/O operations.
+// #define FILE_WRITE (O_RDWR | O_CREAT | O_AT_END)
+#endif
+
 #include "buff.h" // POST request data accumulator
 
 #include "scripts.h" // JavaScript code
@@ -144,6 +162,48 @@ bool sendAppPage(WiFiClient client,IPAddress myIP) {
     return true;
 }
 
+
+bool sendResource(WiFiClient client,IPAddress myIP, char* filename, char* mimeType) {
+    Serial.print("> AnyResource");
+    #if SD_SUPPORT
+        if ( SD.exists( filename ) ) {
+            File f = SD.open( filename );
+            if ( !f ) { 
+                client.println("Oups failed to read any page"); 
+
+                client.print("HTTP/1.1 400 OK\r\nContent-Type: text/html\r\n\r\n");
+                client.print("Oups : failed to read ");
+                client.print(filename);
+                client.println();
+                client.print("\r\n");
+                delay(1);
+
+                return false; 
+            }
+            client.print("HTTP/1.1 200 OK\r\nContent-Type: ");
+            client.print(mimeType);
+            client.print("\r\n\r\n");
+
+            char buffer[1024+1]; memset(buffer, 0x00, 1024+1);
+            while( f.available() ) {
+                int nb = f.read( buffer, 1024 );
+                client.write( buffer, nb );
+            }
+            f.close();
+
+            client.print("\r\n");
+            delay(1);
+        } else
+    #endif
+    sendHtml(client, myIP);
+
+    return true;
+}
+
+
+
+
+
 /* Sending a script to the client's browser ------------------------------------*/
 bool Srvr__file(WiFiClient client, int fileIndex, char *fileName)
 {
@@ -250,6 +310,7 @@ void authenticate(WiFiClient client,IPAddress myIP) {
     delay(1);
 }
 
+char uploadFilename[64]; // beware filename can be up to 63 bytes long
 int uploadFileLen = -1;
 int uploadFileGot = -1;
 
@@ -334,6 +395,11 @@ bool Srvr__loop()
                 return true;
             }
 
+            if (Buff__signature(4, "/test.html")) {
+                sendResource(client, myIP, "/www/test.html", "text/html");
+                return true;
+            }
+
             if (Buff__signature(4, "/favicon.ico")) {
                 // respond 404
                 client.print("HTTP/1.1 400 NOK\r\n");
@@ -372,8 +438,8 @@ bool Srvr__loop()
                     }
 
                     if (Buff__signature(0, "file:")) {
-                        char filename[64]; memset(filename, 0x00, 64);
-                        sprintf(filename, "/www/");
+                        memset(uploadFilename, 0x00, 64);
+                        sprintf(uploadFilename, "/www/");
                         int addr = 5; // "/www/".length()
                         int i = 5; // "file:".length();
                         for(; i < Buff__bufInd-2; i++) {
@@ -381,9 +447,9 @@ bool Srvr__loop()
                                 break;
                             }
                             // FIXME : ensure that name is not more than 63 bytes loong
-                            filename[addr++] = Buff__bufArr[i];
+                            uploadFilename[addr++] = Buff__bufArr[i];
                         }
-                        filename[addr] = 0x00;
+                        uploadFilename[addr] = 0x00;
                         i++;
                         char fileLenStr[16]; 
                         addr = 0;
@@ -394,7 +460,7 @@ bool Srvr__loop()
                         int fileLen = atoi( fileLenStr );
 
                         Serial.print( "Sends the filename (" );
-                        Serial.print( filename );
+                        Serial.print( uploadFilename );
                         Serial.print( ")-(" );
                         Serial.print( fileLen );
                         Serial.println( ")" );
@@ -408,20 +474,40 @@ bool Srvr__loop()
                         Serial.print( " Vs " );
                         Serial.println( uploadFileLen );
 
-                    } else {
-                        for(int i=0; i < Buff__bufInd-2; i+=2) {
-                            int ch = Buff__getByte(i);
-                            if ( ch == -1 ) {
-                                // can occurs @ end of string ...?
-                                // Serial.println("Error decoding blob");
-                                break;
-                            }
-                            Serial.write( (char)ch );
-                            uploadFileGot++;
+                        if (uploadFileLen != uploadFileGot) {
+                            Serial.println("MAY HAD a problem while uploading");
                         }
-                        // uploadFileGot = Buff__bufInd -2;
-                        Serial.println( "=============" );
+
+                    } else {
+
+                        if ( uploadFileGot == 0 ) {
+                            // Cf FILE_WRITE -> is append too
+                            if ( SD.exists(uploadFilename) ) { SD.remove(uploadFilename); }
+                        }
+
+                        File uf = SD.open(uploadFilename, FILE_WRITE);
+
+                        if ( !uf ) {
+                            Serial.print("Error w/ file : "); Serial.println(uploadFilename);
+                        } else {
+                            for(int i=0; i < Buff__bufInd-2; i+=2) {
+                                int ch = Buff__getByte(i);
+                                if ( ch == -1 ) {
+                                    // can occurs @ end of string ...?
+                                    // Serial.println("Error decoding blob");
+                                    break;
+                                }
+                                // Serial.write( (char)ch );
+                                uf.write( (char)ch );
+                                uploadFileGot++;
+                            }
+                            Serial.println( "=============" );
+
+                            uf.flush();
+                            uf.close();
+                        }
                     }
+
 
                     client.print("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n");
                     client.print("OK\n");

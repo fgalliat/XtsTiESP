@@ -30,6 +30,12 @@ SdFatSoftSpiEX<2, 4, 14> SD; // MISO, MOSI, SCK
 #define SD_CS 13
 
 void setupSd() {
+
+  // enable SD card C-select
+  pinMode(SD_CS, OUTPUT);
+  digitalWrite(SD_CS, LOW);
+
+
   if ( !SD.begin(SD_CS) ) {
         Serial.println("SD Failed to begin !");
         return;

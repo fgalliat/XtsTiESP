@@ -35,7 +35,7 @@ Xtase - fgalliat @Aug 2020
       - [ ] SPI Screen just next SPI 8pins headers (**test it**)
     - [x] test SDCard custom SPI config
     - [ ] test ILI custom SPI config
-    - [ ] test all UARTs (0, 1, x)
+    - [x] test all UARTs (0, 1, x) - fixed UART1
     - [x] protect SerialX from 5v logic (switchable)
     - [x] BUZZER / LED
 
@@ -49,6 +49,8 @@ Xtase - fgalliat @Aug 2020
 
       ![ESP32 mini wiring](./pictures/esp32_wiring.png)
 
+      !! BEWARE **RX1** is on **GPIO16** now
+
 - **ideas :**
 
   - webServer w/ DnD + UPLOAD
@@ -57,3 +59,4 @@ Xtase - fgalliat @Aug 2020
     - add SoftAP / STA mode switcher (w/ SoftAP fallback)
     - add SoftAP / STA  - SSID:psk file support + API (? /etc/wifi.psk ?)
   - BT Server / HID Server
+  - connected to XtsTiLink/Ti92 system (of my own)

@@ -2,18 +2,18 @@
 
 ILI 9341 SPI / SdCard SPI (not shared)
 
-- SD
+- SD - ok
 
   ```c++
   #include <SDFat.h>
-
+  
   // in SdFatConfig.h (of SdFatLib)
   //  If the symbol ENABLE_EXTENDED_TRANSFER_CLASS is nonzero, the class SdFatEX
   //  will be defined. If the symbol ENABLE_SOFTWARE_SPI_CLASS is also nonzero,
   //  the class SdFatSoftSpiEX will be defined.
   //  These classes used extended multi-block SD I/O for better performance.
   //  the SPI bus may not be shared with other devices in this mode.
-
+  
   SdFatSoftSpiEX<2, 4, 14> SD; // MISO, MOSI, SCK  
   ```
 
@@ -53,9 +53,24 @@ ILI 9341 SPI / SdCard SPI (not shared)
   #define TFT_RST  -1  // Set TFT_RST to -1 if display RESET is connected to ESP32 board RST
   ```
 
-  
 
-- Layout (DevKit R1) (inspired from YAEL project)
+
+
+- Serial UARTs layout
+
+  ```c++
+  // legacy RX 1 doesn't work
+  #define RX1 16
+  #define TX1 9
+  HardwareSerial SerialX1(1);
+  
+  // connected to XtsTiLink ProMicro 5v
+  #define TXx 33
+  #define RXx 32
+  HardwareSerial SerialX(2); // 5v protected
+  ```
+
+- Layout (DevKit R1) (inspired from YAEL project) - **just as an example**
 
   ```
   //                ___________

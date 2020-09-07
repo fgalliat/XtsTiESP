@@ -81,6 +81,15 @@ bool ti_launchProgram() {
     while( _ti_readError() ) {
         delay(100);
     }
+    delay(1000);
+
+    char ch = 0;
+    int key = ti_readKey(ch);
+
+    if ( key != 0 ) {
+        return false;
+    }
+
     return true;
 }
 
@@ -106,6 +115,8 @@ bool ti_sendTermProgram() {
     serialPtr->print("\\SK");
 
     // read 5 lines w/ "I:..."
+    while( _ti_readInfo() ) { delay(500); } // FIXME
+    while( _ti_readError() ) { delay(200); }
 
     // check if errors readed 'E:..'
     return true;
@@ -116,13 +127,34 @@ bool ti_sendTermProgram() {
 // beware of "E:..." errors
 int ti_readKey(char &ch) {
     while( _ti_readError() ) {
-        delay(100);
+        delay(150);
+    }
+
+    if ( serialPtr->available() <= 0 ) {
+        return -1;
+    }
+
+    if ( serialPtr->available() >= 4 ) {
+        char c0 = serialPtr->read();
+        char c1 = serialPtr->read();
+        char c2 = serialPtr->read();
+        char c3 = serialPtr->read();
+
+        if ( c0 != 'K' ) {
+            // WTF
+            return -1;
+        }
+
+        ch = c1;
+
+        int keyCode = (c2 << 8) + c3;
+        return keyCode;
     }
 
     // -1 for no key
     // 0 for no spe key 0 (when prg starts)
     // else keyCode
 
-    return 0;
+    return -1;
 }
 

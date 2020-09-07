@@ -7,6 +7,9 @@
 
 #include "hardware.h"
 
+#include "tilink.h"
+
+
 /*
  * in SdFatConfig.h (of SdFatLib)
  *  If the symbol ENABLE_EXTENDED_TRANSFER_CLASS is nonzero, the class SdFatEX
@@ -61,6 +64,12 @@ void _setupUarts() {
 }
 
 
+bool _setupTiLink() {
+    ti_setSerial( &SerialX );
+    return true;
+}
+
+
 bool setupHardware() {
     bool ok = true;
     Serial.begin(115200);
@@ -74,6 +83,8 @@ bool setupHardware() {
     _setupBtn();
 
     ok &= _setupSd();
+
+    ok &= _setupTiLink();
 
     return ok;
 }

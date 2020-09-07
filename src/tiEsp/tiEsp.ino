@@ -8,6 +8,9 @@
 
 #include "hardware.h"
 
+
+#include "tilink.h"
+
 void setup() {
     bool ok = setupHardware();
 
@@ -24,19 +27,21 @@ void setup() {
 }
 
 void loop() {
-    // FIXME : check that sd is OK
-    led(true);
-    File f = sd_openFile("/hello.txt");
-    if ( !f ) {
-        Serial.println("Failed to open file");
-    } else {
-        Serial.println("Able to open file");
-        while( f.available() ) {
-           Serial.write( f.read() ); 
+    // FIXME : check that sd is OK before ...
+    if ( false ) {
+        led(true);
+        File f = sd_openFile("/hello.txt");
+        if ( !f ) {
+            Serial.println("Failed to open file");
+        } else {
+            Serial.println("Able to open file");
+            while( f.available() ) {
+                Serial.write( f.read() ); 
+            }
+            f.close();
         }
-        f.close();
+        led(false);
     }
-    led(false);
 
     delay(5000);
     Serial.write('.');

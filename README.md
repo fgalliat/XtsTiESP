@@ -27,14 +27,15 @@ Xtase - fgalliat @Aug 2020
     - [ ] Soldering
       - [x] SCL & SDA
       - [x] maybe Aref to Vcc (SCL,SDA,Vcc,GND ~kinda GROVE)
-      - [ ] 8pins headers for Screen on lower-board
+      - [x] 8pins headers for Screen on lower-board
       - [x] SDCard Reader on upper board / cut pins @ bottom
       - [x] SDCard to SPI SD (**code wrote / works!**)
-      - [ ] Screen SPI missing solders (MISO,MOSI, SCK)
-      - [ ] some solders between lower & upper boards
-      - [ ] SPI Screen just next SPI 8pins headers (**test it**)
+      - [x] Screen SPI missing solders (MISO,MOSI, SCK)
+      - [x] some solders between lower & upper boards
+      - [x] SPI Screen just next SPI 8pins headers (**test it**)
+      - [ ] Additional Button (PULL_UP)
     - [x] test SDCard custom SPI config
-    - [ ] test ILI custom SPI config
+    - [x] test ILI custom SPI config
     - [x] test all UARTs (0, 1, x) - fixed UART1
     - [x] protect SerialX from 5v logic (switchable)
     - [x] BUZZER / LED

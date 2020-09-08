@@ -8,6 +8,17 @@
 #include <Arduino.h>
 #include "globals.h"
 
+#include <SPI.h>
+#include <TFT_eSPI.h>
+// in : TFT_eSPI User_Setup.h
+#define TFT_MISO 19
+#define TFT_MOSI 23
+#define TFT_SCLK 18
+#define TFT_CS   5  // as for YAEL layout
+#define TFT_DC    15  // as for YAEL layout
+#define TFT_RST  -1  // Set TFT_RST to -1 if display RESET is connected to ESP32 board RST
+
+
 // ==== Custom SPI SdCard ==== 
 // beware if "WiFi.h" is called after : need to redeclare file access flags 
 // else can't CREATE new file !!!

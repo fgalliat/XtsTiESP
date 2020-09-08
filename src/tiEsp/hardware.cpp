@@ -9,6 +9,18 @@
 
 #include "tilink.h"
 
+// Use hardware SPI
+TFT_eSPI tft = TFT_eSPI();
+
+bool _setupLcd() {
+  tft.init();
+  tft.setRotation(1);
+  tft.fillScreen(TFT_BLACK);
+
+  tft.println("Hello World on XtsTiESP");
+
+  return true;
+}
 
 /*
  * in SdFatConfig.h (of SdFatLib)
@@ -74,6 +86,8 @@ bool setupHardware() {
     bool ok = true;
     Serial.begin(115200);
 
+    ok &= _setupLcd(); // must be 1st Cf reboot timing issues
+
     _setupUarts();
 
     _setupLed();
@@ -81,6 +95,7 @@ bool setupHardware() {
     _setupBuzzer();
     
     _setupBtn();
+
 
     ok &= _setupSd();
 

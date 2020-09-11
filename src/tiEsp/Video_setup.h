@@ -8,7 +8,8 @@
  */
 
 #ifndef SPI_32
- #define SPI_32(H,L) ( (H)<<16 | (L) )
+ //  #define SPI_32(H,L) ( (H)<<16 | (L) )
+ #define SPI_32(H,L) ( ((H)<<8 | (H)>>8) | (((L)<<8 | (L)>>8)<<16 ) )
 
  #define DC_C digitalWrite(TFT_DC, LOW)
  #define DC_D digitalWrite(TFT_DC, HIGH)
@@ -35,6 +36,8 @@ inline void _TFT_eSPI_spi_end(void) {
 }
 // ____________
 
+bool firstDraw = true;
+
 inline void _TFT_moa_placeForPixPush(int x, int y) {
     DC_C;
     
@@ -54,6 +57,17 @@ inline void _TFT_moa_placeForPixPush(int x, int y) {
 
 // ~equiv setWindow
 inline void _TFT_moa_placeForLinePush(int x, int y, int zoomX) {
+
+    if ( firstDraw ) {
+        // screen.println("=================");
+        // screen.print("CASET "); screen.println(TFT_CASET);
+        // screen.print("PASET "); screen.println(TFT_PASET);
+        // screen.print("RAMWR "); screen.println(TFT_RAMWR);
+        // screen.println("=================");
+        firstDraw = false;
+    }
+
+
     DC_C;
     
     tft_Write_8(TFT_CASET);

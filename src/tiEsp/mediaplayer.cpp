@@ -9,7 +9,7 @@
 
 #include "hardware.h"
 
-#define ANM_DBUG 1
+#define ANM_DBUG 0
 
 // #define screen M5.Lcd
 #define screen tft
@@ -37,7 +37,7 @@ bool playANM(char* mediaFile) {
 
     bool ok = loadAnime(mediaFile);
     if ( !ok ) { return false; }
-    playAnime();
+    playAnime(true);
     closeAnime();
 
     // FIXME

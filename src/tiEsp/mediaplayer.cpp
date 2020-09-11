@@ -11,6 +11,14 @@
 
 #define ANM_DBUG 1
 
+// #define screen M5.Lcd
+#define screen tft
+
+extern int anm_w;
+#include "Video_setup.h"
+#include "ANM_soft.h"
+#include "PIC_soft.h"
+
 // plays a video ".anm" (own format)
 bool playANM(char* mediaFile) {
 
@@ -25,6 +33,12 @@ bool playANM(char* mediaFile) {
         #endif
         return false;
     }
+
+
+    bool ok = loadAnime(mediaFile);
+    if ( !ok ) { return false; }
+    playAnime();
+    closeAnime();
 
     // FIXME
     return true;
@@ -44,6 +58,11 @@ bool playPIC(char* mediaFile) {
         #endif
         return false;
     }
+
+    bool ok = loadPicture(mediaFile);
+    if ( !ok ) { return false; }
+    drawPicture();
+    closePicture();
 
     // FIXME
     return true;

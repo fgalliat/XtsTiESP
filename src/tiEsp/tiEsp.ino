@@ -28,6 +28,7 @@ void setup() {
 
     if ( true ) {
         playAnime("/media/anime/DOOR");
+        playAnime("/media/anime/FACEW");
     }
 
 }
@@ -49,6 +50,29 @@ void loop() {
         led(false);
     }
 
-    delay(5000);
-    Serial.write('.');
+    if ( true ) {
+        if ( Serial.available() > 0 ) {
+            static const int buffSize = 64;
+            char msg[buffSize+1]; memset(msg, 0x00, buffSize+1);
+            int read = Serial.readBytesUntil('\n', msg, buffSize);
+
+            // test : $> echo "vid:/media/anime/FACEW" > /dev/ttyUSB0
+            if ( strncmp("vid:", msg, 4) == 0 ) {
+                bool ok = playAnime(&msg[4]);
+                if (!ok) {
+                    Serial.printf("Could not play '%s' \n", &msg[4]);
+                }
+            } else {
+                Serial.print("I read : "); Serial.println(msg);
+                Serial.println("------------");
+            }
+
+        } else {
+            delay(100);
+        }
+    } else {
+        delay(5000);
+        Serial.write('.');
+    }
+
 }

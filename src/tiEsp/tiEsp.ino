@@ -10,6 +10,7 @@
 
 
 #include "tilink.h"
+#include "mediaplayer.h"
 
 void setup() {
     bool ok = setupHardware();
@@ -22,6 +23,11 @@ void setup() {
     if ( !ok ) {
         Serial.println("Some hardware failed !");
         led(true);
+    }
+
+
+    if ( true ) {
+        playAnime("/media/anime/DOOR");
     }
 
 }

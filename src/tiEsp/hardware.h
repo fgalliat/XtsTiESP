@@ -18,6 +18,8 @@
 #define TFT_DC    15  // as for YAEL layout
 #define TFT_RST  -1  // Set TFT_RST to -1 if display RESET is connected to ESP32 board RST
 
+extern TFT_eSPI tft;
+
 
 // ==== Custom SPI SdCard ==== 
 // beware if "WiFi.h" is called after : need to redeclare file access flags 
@@ -67,3 +69,6 @@ void led(bool on);
 
 
 File sd_openFile(char* filename, bool read=true, bool append=false);
+bool sd_exists(char* filename);
+
+void tft_cls();

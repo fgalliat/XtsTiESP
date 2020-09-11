@@ -143,3 +143,13 @@ File sd_openFile(char* filename, bool read, bool append) {
     return f;
 }
 
+bool sd_exists(char* filename) {
+    return SD.exists(filename);
+}
+
+// ======== Screen ================
+
+void tft_cls() {
+    tft.fillScreen(TFT_BLACK);
+    tft.setCursor(0,0);
+}

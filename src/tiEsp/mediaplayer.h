@@ -17,3 +17,4 @@ bool playPIC(char* mediaFile);
 // plays a full animation (as possible) ".pic" + ".anm" + "_e.pic" (own format)
 bool playAnime(char* mediaName);
 
+void textBox(char* text, bool bottom=false);

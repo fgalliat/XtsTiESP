@@ -27,7 +27,7 @@ void setup() {
 
 
     if ( true ) {
-        playAnime("/media/anime/DOOR");
+        // playAnime("/media/anime/DOOR");
         playAnime("/media/anime/FACEW");
     }
 
@@ -62,6 +62,10 @@ void loop() {
                 if (!ok) {
                     Serial.printf("Could not play '%s' \n", &msg[4]);
                 }
+            } else if ( strncmp("txb:u:", msg, 6) == 0 ) {
+                textBox(&msg[6], false);
+            } else if ( strncmp("txb:d:", msg, 6) == 0 ) {
+                textBox(&msg[6], true);
             } else {
                 Serial.print("I read : "); Serial.println(msg);
                 Serial.println("------------");

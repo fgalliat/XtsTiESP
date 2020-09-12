@@ -18,6 +18,7 @@ extern int anm_w;
 #include "Video_setup.h"
 #include "ANM_soft.h"
 #include "PIC_soft.h"
+#include "GUI_soft.h"
 
 // plays a video ".anm" (own format)
 bool playANM(char* mediaFile) {
@@ -70,6 +71,11 @@ bool playPIC(char* mediaFile) {
 
 /**
  * beware : stops if not find the 1st static picture !?
+ * 
+ * TODO 
+ * playAnime("TODO.pic") just disp image
+ * playAnime("TODO.anm") just disp video
+ * 
  */
 bool playAnime(char* mediaName) {
 

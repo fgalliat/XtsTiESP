@@ -204,6 +204,14 @@ void textBox(char* text, bool bottom=false) {
         y = ( scHeight - h - 20 );
     }
 
+    // Serial.println("Asked a text box");
+    // if (bottom) Serial.println("bottom");
+    // else Serial.println("top");
+    // Serial.println(text);
+    // Serial.printf("X:%d Y:%d\n", x, y);
+
+    screen.setTextColor( TFT_WHITE, TFT_BLUE );
+
     screen.fillRect( x-3, y-3, w+6, h+6, TFT_BLUE );
     screen.drawRect( x-3, y-3, w+6, h+6, TFT_WHITE );
 
@@ -309,7 +317,8 @@ while(true) {
 
 
 void error(char* str) {
-    screen.clear();
+    //screen.clear();
+    tft_cls();
     screen.setCursor(0,0);
     screen.println("===========");
     screen.println( str );

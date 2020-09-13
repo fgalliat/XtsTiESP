@@ -63,8 +63,14 @@ void loop() {
                     Serial.printf("Could not play '%s' \n", &msg[4]);
                 }
             } else if ( strncmp("txb:u:", msg, 6) == 0 ) {
+                for(int i=0; i < strlen(msg); i++) {
+                    msg[i] = msg[i] == '\r' ? '\n' : msg[i]; 
+                }
                 textBox(&msg[6], false);
             } else if ( strncmp("txb:d:", msg, 6) == 0 ) {
+                for(int i=0; i < strlen(msg); i++) {
+                    msg[i] = msg[i] == '\r' ? '\n' : msg[i]; 
+                }
                 textBox(&msg[6], true);
             } else {
                 Serial.print("I read : "); Serial.println(msg);

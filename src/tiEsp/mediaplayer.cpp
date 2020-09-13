@@ -88,6 +88,25 @@ bool playAnime(char* mediaName) {
     char fullName[ fnMax+1 ];
     memset(fullName, 0x00, fnMax+1 );
 
+    bool playOnly1stPic = false;
+    bool playOnlyMovie = false;
+
+    int tlen = strlen( mediaName );
+    if ( tlen > 4 && strncmp(".pic", &mediaName[ tlen - 4 ], 4 ) == 0 ) {
+        playOnly1stPic = true;
+        return playPIC( mediaName );
+    } else if ( tlen > 4 && strncmp(".anm", &mediaName[ tlen - 4 ], 4 ) == 0 ) {
+        playOnlyMovie = true;
+        if ( playANM(mediaName) ) {
+            for(int i=0; i < tlen-4; i++) { fullName[i] = mediaName[i]; }
+            sprintf(fullName, "%s_e.pic", fullName);
+            playPIC(fullName);
+            return true;
+        }
+        return false;
+    } 
+    // ........
+
     // try to disp. 1st static picture
     sprintf(fullName, "%s.pic", mediaName);
     if ( !playPIC(fullName) ) {

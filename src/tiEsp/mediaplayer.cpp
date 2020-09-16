@@ -107,10 +107,14 @@ bool playAnime(char* mediaName) {
     } 
     // ........
 
-    // try to disp. 1st static picture
-    sprintf(fullName, "%s.pic", mediaName);
-    if ( !playPIC(fullName) ) {
-        return false;
+    bool tryToDispFirstStatic = false;
+
+    if (tryToDispFirstStatic) {
+        // try to disp. 1st static picture
+        sprintf(fullName, "%s.pic", mediaName);
+        if ( !playPIC(fullName) ) {
+            return false;
+        }
     }
 
     // if found, try to play video
@@ -119,6 +123,15 @@ bool playAnime(char* mediaName) {
         // if there is an end-picture : dislpay it
         sprintf(fullName, "%s_e.pic", mediaName);
         playPIC(fullName);
+    } else {
+        if ( !tryToDispFirstStatic ) {
+            // try to disp. 1st static picture
+            // if could not play video
+            sprintf(fullName, "%s.pic", mediaName);
+            if ( !playPIC(fullName) ) {
+                return false;
+            }  
+        }
     }
 
     return true;

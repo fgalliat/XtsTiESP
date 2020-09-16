@@ -52,7 +52,7 @@ void loop() {
 
     if ( true ) {
         if ( Serial.available() > 0 ) {
-            static const int buffSize = 64;
+            static const int buffSize = 128;
             char msg[buffSize+1]; memset(msg, 0x00, buffSize+1);
             int read = Serial.readBytesUntil('\n', msg, buffSize);
 
